@@ -1,0 +1,7 @@
+{
+  "name": "Copy of AEDIL",
+  "description": "AI field service orchestration platform for industrial equipment manufacturers.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
