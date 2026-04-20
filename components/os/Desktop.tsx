@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { useOS } from '../../store';
 import { Dock } from './Dock';
 import { Window } from './Window';
-import { AedilOverlay } from './AedilOverlay';
 import { Outlook } from '../apps/Outlook';
 import { SAP } from '../apps/SAP';
 import { FSM } from '../apps/FSM';
@@ -11,36 +10,39 @@ import { Mobile } from '../apps/Mobile';
 import { Settings } from '../apps/Settings';
 import { AedilConsole } from '../apps/AedilConsole';
 import { Porta } from '../apps/Porta';
+import { Gallery } from '../apps/Gallery';
 import { Wifi, Battery, Search, Command, HardDrive, Folder, FileImage, Monitor } from 'lucide-react';
+import { WindowState } from '../../types';
 
-export const Desktop: React.FC = () => {
-  const { windows, activeAppId } = useOS();
+// Isolated Clock Component to prevent full Desktop re-renders
+const MenuBarClock = () => {
   const [time, setTime] = useState(new Date());
-
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+  
+  return (
+    <span className="drop-shadow-md font-medium">
+      {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &nbsp;
+      {time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+    </span>
+  );
+};
 
-  // Get the title of the active app for the menu bar
+// Isolated Menu Bar
+const MenuBar = memo(() => {
+  const activeAppId = useOS(state => state.activeAppId);
+  const windows = useOS(state => state.windows);
+  
   const activeAppTitle = activeAppId ? windows[activeAppId].title : 'Finder';
+  const appName = activeAppId === 'outlook' ? 'Outlook' : (activeAppTitle === 'Outlook Web' ? 'Outlook' : (activeAppId ? activeAppTitle.split(' ')[0] : 'Finder'));
 
   return (
-    <div className="fixed inset-0 bg-black overflow-hidden font-sans select-none text-white antialiased">
-      
-      {/* macOS Wallpaper (Big Sur / Monterey Style) */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center z-0"
-        style={{ 
-           backgroundImage: `url('https://4kwallpapers.com/images/wallpapers/macos-big-sur-apple-layers-fluidic-colorful-wwdc-2020-5120x2880-1432.jpg')`,
-        }}
-      />
-
-      {/* macOS Menu Bar */}
       <div className="absolute top-0 left-0 right-0 h-[28px] bg-black/20 backdrop-blur-xl flex items-center justify-between px-4 text-[13px] font-medium z-[9999] shadow-sm border-b border-white/5">
         <div className="flex items-center gap-5 pl-1">
           <span className="text-[15px] drop-shadow-md hover:opacity-70 cursor-default"></span>
-          <span className="font-bold drop-shadow-md cursor-default">{activeAppId === 'outlook' ? 'Outlook' : (activeAppTitle === 'Outlook Web' ? 'Outlook' : (activeAppId ? activeAppTitle.split(' ')[0] : 'Finder'))}</span>
+          <span className="font-bold drop-shadow-md cursor-default">{appName}</span>
           <span className="hidden md:inline drop-shadow-md opacity-90 hover:opacity-100 cursor-default">File</span>
           <span className="hidden md:inline drop-shadow-md opacity-90 hover:opacity-100 cursor-default">Edit</span>
           <span className="hidden md:inline drop-shadow-md opacity-90 hover:opacity-100 cursor-default">View</span>
@@ -58,12 +60,31 @@ export const Desktop: React.FC = () => {
                <Monitor className="w-[14px] h-[14px] drop-shadow-md" />
              </div>
           </div>
-          <span className="drop-shadow-md font-medium">
-            {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} &nbsp;
-            {time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-          </span>
+          <MenuBarClock />
         </div>
       </div>
+  );
+});
+
+export const Desktop: React.FC = () => {
+  // Use specific selector to avoid re-rendering Desktop when other parts of store change
+  const windows = useOS(state => state.windows);
+  
+  // Check if any window is in "True Full Screen" mode
+  const hasMaximizedWindow = Object.values(windows).some((w: WindowState) => w.isOpen && w.isMaximized);
+
+  return (
+    <div className="fixed inset-0 bg-black overflow-hidden font-sans select-none text-white antialiased">
+      
+      {/* macOS Wallpaper */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center z-0"
+        style={{ 
+           backgroundImage: `url('https://4kwallpapers.com/images/wallpapers/macos-big-sur-apple-layers-fluidic-colorful-wwdc-2020-5120x2880-1432.jpg')`,
+        }}
+      />
+
+      <MenuBar />
 
       {/* Desktop Icons Grid (Right Side) */}
       <div className="absolute top-10 right-4 flex flex-col gap-6 items-end z-0">
@@ -75,43 +96,40 @@ export const Desktop: React.FC = () => {
       </div>
 
       {/* Desktop Area - Window Manager */}
-      <div className="relative w-full h-full z-10 pointer-events-none">
-         {/* Re-enable pointer events for windows */}
-         <div className="contents pointer-events-auto">
-            <Window id="outlook" defaultPosition={{x: 100, y: 80}} width={1100}>
-               <Outlook />
-            </Window>
+      <div className={`absolute inset-0 pointer-events-none overflow-hidden ${hasMaximizedWindow ? 'z-[20000]' : 'z-10'}`}>
+         <Window id="outlook" defaultPosition={{x: 100, y: 80}} width={1100}>
+            <Outlook />
+         </Window>
 
-            <Window id="sap" defaultPosition={{x: 150, y: 120}} width={1024}>
-               <SAP />
-            </Window>
+         <Window id="sap" defaultPosition={{x: 150, y: 120}} width={1024}>
+            <SAP />
+         </Window>
 
-            <Window id="fsm" defaultPosition={{x: 200, y: 160}} width={1024}>
-               <FSM />
-            </Window>
+         <Window id="fsm" defaultPosition={{x: 200, y: 160}} width={1024}>
+            <FSM />
+         </Window>
 
-            <Window id="mobile" defaultPosition={{x: 900, y: 100}} width={360}>
-               <Mobile />
-            </Window>
+         <Window id="mobile" defaultPosition={{x: 900, y: 80}}>
+            <Mobile />
+         </Window>
 
-            <Window id="console" defaultPosition={{x: 120, y: 100}} width={1000}>
-               <AedilConsole />
-            </Window>
+         <Window id="console" defaultPosition={{x: 120, y: 100}} width={1000}>
+            <AedilConsole />
+         </Window>
 
-            <Window id="settings" defaultPosition={{x: 350, y: 200}} width={800}>
-               <Settings />
-            </Window>
+         <Window id="settings" defaultPosition={{x: 350, y: 200}} width={800}>
+            <Settings />
+         </Window>
 
-            <Window id="porta" defaultPosition={{x: 400, y: 100}} width={400}>
-               <Porta />
-            </Window>
+         <Window id="porta" defaultPosition={{x: 400, y: 80}}>
+            <Porta />
+         </Window>
 
-            {/* The Neural Overlay */}
-            <AedilOverlay />
-         </div>
+         <Window id="gallery" defaultPosition={{x: 250, y: 150}} width={900}>
+            <Gallery />
+         </Window>
       </div>
 
-      {/* Dock */}
       <Dock />
       
     </div>
@@ -119,7 +137,7 @@ export const Desktop: React.FC = () => {
 };
 
 const DesktopIcon = ({ icon: Icon, label, color, bg, isFile }: any) => (
-   <div className="flex flex-col items-center gap-1 group w-24 cursor-pointer">
+   <div className="flex flex-col items-center gap-1 group w-24 cursor-pointer pointer-events-auto">
       <div className={`w-14 h-14 rounded-xl ${isFile ? 'bg-white shadow-sm' : ''} flex items-center justify-center relative`}>
          {!isFile && <div className={`absolute inset-0 ${bg} opacity-20 rounded-xl blur-sm`}></div>}
          {isFile ? (

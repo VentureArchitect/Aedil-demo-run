@@ -12,10 +12,10 @@ export const Card: React.FC<{ children: React.ReactNode, className?: string, glo
 
 export const Badge: React.FC<{ type: 'warning' | 'success' | 'neutral' | 'error', children: React.ReactNode }> = ({ type, children }) => {
   const styles = {
-    warning: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+    warning: "bg-white/10 border border-white/20/10 text-white border-amber-500/20",
     success: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
     error: "bg-red-500/10 text-red-500 border-red-500/20",
-    neutral: "bg-slate-700/30 text-slate-400 border-slate-600/30"
+    neutral: "bg-slate-700/30 text-zinc-400 border-slate-600/30"
   };
   return (
     <span className={`px-2 py-1 rounded-md text-xs font-mono border ${styles[type] || styles.neutral} uppercase tracking-wider`}>

@@ -1,21 +1,75 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useOS } from '../../store';
-import { Mail, Database, Truck, Smartphone, Settings, Zap, Mic } from 'lucide-react';
+import { Mail, Database, Truck, Smartphone, Settings, Zap, Mic, FileImage } from 'lucide-react';
 import { AppId, WindowState } from '../../types';
+import { AedilLogo } from '../ui/AedilLogo';
 
 export const Dock: React.FC = () => {
   const { windows, openApp, focusApp } = useOS();
+  const [screenSize, setScreenSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+
+  // Track screen size for collision detection
+  useEffect(() => {
+    const handleResize = () => setScreenSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
-  // Check if any active window is maximized to auto-hide the dock
-  const isMaximized = Object.values(windows).some((w) => (w as WindowState).isOpen && (w as WindowState).isMaximized);
+  // Dynamic Collision Detection
+  // Check if any open window intersects with the Dock's reserved space
+  const shouldHide = Object.values(windows).some((w: WindowState) => {
+      // Ignore closed or minimized windows
+      if (!w.isOpen || w.isMinimized) return false;
+      // Always hide if any window is maximized
+      if (w.isMaximized) return true;
+
+      // Dock Area Definition
+      // The dock is centered at the bottom.
+      // Approx width: 9 icons * ~60px + gaps + padding ~= 650px. 
+      // Height: ~90px safe zone from bottom.
+      const dockWidth = 680;
+      const dockHeight = 100;
+      
+      const dockRect = {
+          left: (screenSize.width - dockWidth) / 2,
+          right: (screenSize.width + dockWidth) / 2,
+          top: screenSize.height - dockHeight,
+          bottom: screenSize.height
+      };
+
+      // Window Dimensions
+      // Fallback to store defaults or approximations if strict size is missing
+      // Note: Must align with Window.tsx rendering defaults
+      const wWidth = w.size?.width || (w.id === 'mobile' || w.id === 'porta' ? 400 : 900);
+      const wHeight = w.size?.height || (w.id === 'mobile' || w.id === 'porta' ? 650 : 600);
+      const wX = w.position?.x ?? 100;
+      const wY = w.position?.y ?? 100;
+
+      const wRect = {
+          left: wX,
+          right: wX + wWidth,
+          top: wY,
+          bottom: wY + wHeight
+      };
+
+      // Check for Intersection
+      const intersects = (
+          wRect.left < dockRect.right &&
+          wRect.right > dockRect.left &&
+          wRect.top < dockRect.bottom &&
+          wRect.bottom > dockRect.top
+      );
+
+      return intersects;
+  });
 
   const apps = [
-    { id: 'outlook', icon: Mail, label: 'Outlook', color: 'bg-[#0078D4]', iconImg: null }, // Fixed broken icon
-    { id: 'sap', icon: Database, label: 'SAP', color: 'bg-indigo-600', iconImg: 'https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg' },
-    { id: 'fsm', icon: Truck, label: 'IFS FSM', color: 'bg-purple-600', iconImg: '' },
-    { id: 'mobile', icon: Smartphone, label: 'Mobile', color: 'bg-zinc-800', iconImg: '' },
+    { id: 'outlook', icon: Mail, label: 'Outlook', color: 'bg-[#0078D4]', iconImg: null }, 
+    { id: 'sap', icon: Database, label: 'SAP', color: 'bg-white/10 border border-white/20', iconImg: 'https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg' },
+    { id: 'fsm', icon: Truck, label: 'IFS FSM', color: 'bg-white/10 border border-white/20', iconImg: '' },
+    { id: 'mobile', icon: Smartphone, label: 'Mobile', color: 'bg-white/10 border border-white/20', iconImg: '' },
   ];
 
   const handleAppClick = (id: AppId) => {
@@ -27,7 +81,7 @@ export const Dock: React.FC = () => {
   };
 
   return (
-    <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-[10000] transition-all duration-500 ease-in-out ${isMaximized ? 'translate-y-40 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+    <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-[10000] transition-all duration-500 ease-in-out ${shouldHide ? 'translate-y-40 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
        <div className="flex items-end gap-3 px-4 py-3 bg-white/10 backdrop-blur-2xl rounded-[24px] border border-white/10 shadow-macos-dock">
           
           {/* Finder Icon (Static) */}
@@ -63,25 +117,34 @@ export const Dock: React.FC = () => {
           <DockIcon 
              icon={Mic} 
              label="AEDIL Porta" 
-             color="bg-gradient-to-tr from-indigo-500 to-purple-500" 
+             color="bg-white/10 border border-white/20" 
              isOpen={windows.porta.isOpen} 
              onClick={() => handleAppClick('porta')} 
           />
 
           {/* AEDIL CONSOLE ICON */}
           <DockIcon 
-             icon={Zap} 
+             icon={() => <AedilLogo className="w-6 h-6" />} 
              label="AEDIL Console" 
-             color="bg-amber-500" 
+             color="bg-white/10 border border-white/20" 
              isOpen={windows.console.isOpen} 
              onClick={() => handleAppClick('console')} 
+          />
+
+          {/* GALLERY ICON */}
+          <DockIcon 
+             icon={FileImage} 
+             label="Sales Deck SVGs" 
+             color="bg-white/10 border border-white/20" 
+             isOpen={windows.gallery.isOpen} 
+             onClick={() => handleAppClick('gallery')} 
           />
 
           <DockIcon 
             icon={Settings} 
             label="System Settings" 
-            color="bg-gray-500" 
-            iconImg={null} // Fixed broken icon
+            color="bg-white/10 border border-white/20" 
+            iconImg={null} 
             isOpen={windows.settings.isOpen} 
             onClick={() => handleAppClick('settings')} 
           />

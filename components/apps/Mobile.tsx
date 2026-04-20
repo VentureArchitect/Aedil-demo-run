@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { useOS } from '../../store';
 import { MOCK_TICKETS } from '../../constants';
@@ -39,7 +38,7 @@ export const Mobile: React.FC = () => {
         <div className="absolute top-48 -right-[7px] w-[6px] h-20 bg-[#2a2a2a] rounded-r-md shadow-inner"></div> 
 
         {/* SCREEN AREA */}
-        <div className="w-full h-full bg-[#F2F2F7] font-sans flex flex-col relative overflow-hidden rounded-[48px] mask-image-fill">
+        <div className="w-full h-full bg-black font-sans flex flex-col relative overflow-hidden rounded-[48px]">
             
             {/* iOS Status Bar */}
             <div className="absolute top-0 left-0 w-full h-[44px] px-6 flex items-center justify-between text-white z-[60] pointer-events-none mix-blend-difference">
@@ -77,8 +76,8 @@ export const Mobile: React.FC = () => {
                         onClick={() => toggleSmartLens(true)}
                         className="group w-full flex items-center justify-center gap-3 bg-[#1C1C1E]/95 backdrop-blur-xl hover:bg-black text-white font-semibold py-3.5 px-6 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/10 transition-all hover:scale-[1.02] active:scale-95"
                     >
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-400 to-amber-500 flex items-center justify-center group-hover:rotate-180 transition-transform duration-500 shadow-lg shadow-amber-500/30">
-                            <Zap className="w-3.5 h-3.5 text-black fill-black" />
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-white/40 to-transparent flex items-center justify-center group-hover:rotate-180 transition-transform duration-500 shadow-lg shadow-white/20">
+                            <Zap className="w-3.5 h-3.5 text-white fill-white" />
                         </div>
                         <span className="text-[13px] tracking-wide">Open Smart Lens</span>
                     </button>
@@ -94,7 +93,7 @@ export const Mobile: React.FC = () => {
             </AnimatePresence>
 
             {/* Home Indicator */}
-            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-black/80 rounded-full z-[100] pointer-events-none backdrop-blur-md"></div>
+            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/80 rounded-full z-[100] pointer-events-none backdrop-blur-md"></div>
         </div>
     </div>
   );

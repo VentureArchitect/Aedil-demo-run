@@ -1,3 +1,4 @@
+
 import { Ticket, Technician, Part } from './types';
 
 export const MOCK_TICKETS: Ticket[] = [
@@ -25,62 +26,8 @@ export const MOCK_TICKETS: Ticket[] = [
     },
     priority: 'HIGH',
     status: 'READY',
-    createdAt: new Date(Date.now() - 1000 * 60 * 2).toISOString(), // 2 mins ago
-    slaDeadline: new Date(Date.now() + 1000 * 60 * 60 * 2.3).toISOString(), // ~2h left
-  },
-  {
-    id: 't2',
-    number: '11447112',
-    customer: {
-      name: 'Logistics Pro GmbH',
-      debitorId: '11316220',
-      contact: 'Sarah Weber',
-      phone: '+49 (0)89 / 123-4567',
-      email: 's.weber@logisticspro.de',
-      location: 'Munich, North'
-    },
-    equipment: {
-      model: 'EFG 216',
-      serialNumber: '51659912',
-      operatingHours: 4100,
-      lastService: '2024-09-10'
-    },
-    error: {
-      code: 'E0402',
-      description: 'Traction controller timeout',
-      customerReport: 'Vehicle stops intermittently during operation.'
-    },
-    priority: 'MEDIUM',
-    status: 'DISPATCHED',
-    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    slaDeadline: new Date(Date.now() + 1000 * 60 * 60 * 12).toISOString(),
-  },
-  {
-    id: 't3',
-    number: '11447098',
-    customer: {
-      name: 'AutoParts Berlin',
-      debitorId: '11315588',
-      contact: 'Klaus Meyer',
-      phone: '+49 (0)30 / 987-6543',
-      email: 'kmeyer@autoparts.de',
-      location: 'Berlin, Spandau'
-    },
-    equipment: {
-      model: 'RR 20',
-      serialNumber: '51651100',
-      operatingHours: 12500,
-      lastService: '2024-01-15'
-    },
-    error: {
-      code: 'W2201',
-      description: 'Battery electrolyte low',
-      customerReport: 'Maintenance warning light flashing.'
-    },
-    priority: 'LOW',
-    status: 'COMPLETED',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    slaDeadline: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
+    slaDeadline: new Date(Date.now() + 1000 * 60 * 60 * 2.3).toISOString(),
   }
 ];
 
@@ -89,13 +36,25 @@ export const MOCK_TECHNICIAN: Technician = {
   name: 'Stefan K.',
   distance: '12km',
   eta: '18 min',
-  experience: '23 EJC hydraulic repairs',
-  ftfr: 91,
+  experience: 'L3 Heavy Mechanic (Steering/Hydraulics)',
+  ftfr: 94,
   available: true
 };
 
+// --- UPDATED PARTS PER TECHNICAL REPORT (GOLD STANDARD) ---
 export const RECOMMENDED_PARTS: Part[] = [
-  { id: 'p1', name: 'Pump motor 51408011', price: 472, inStock: true, quantity: 2 },
-  { id: 'p2', name: 'Fluid 2L 51506072', price: 18, inStock: true, quantity: 50 },
-  { id: 'p3', name: 'Seal kit 51408019', price: 45, inStock: true, quantity: 12 },
+  // PDF GOLDEN PATH: RANG 1
+  { id: '50452065', name: 'Rep. Satz; Drehkranzlager', price: 183.71, inStock: true, quantity: 2 },
+  // PDF GOLDEN PATH: RANG 2
+  { id: '51509314', name: 'Sensorlager; kpl. montiert', price: 161.65, inStock: true, quantity: 5 },
+  // PDF GOLDEN PATH: RANG 3
+  { id: '51470075', name: 'Initiator (Sonder NPN)', price: 22.26, inStock: true, quantity: 12 },
+  
+  // Standard Catalog
+  { id: '50432291', name: 'Antriebsrad Vulkollan', price: 185.00, inStock: true, quantity: 12 },
+  { id: '50054881', name: 'Lastrad Polyurethan', price: 62.00, inStock: true, quantity: 40 },
+  { id: '51103422', name: 'Lenkistwertsensor', price: 85.00, inStock: true, quantity: 8 },
+  { id: '50998877', name: 'Lenkmotor', price: 420.00, inStock: true, quantity: 2 },
+  { id: '51506072', name: 'Hydrauliköl HLP 46 (5L)', price: 45.00, inStock: true, quantity: 50 },
+  { id: '50000001', name: 'Sicherung 80A', price: 4.00, inStock: true, quantity: 100 },
 ];

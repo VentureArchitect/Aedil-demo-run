@@ -1,6 +1,6 @@
 
 
-export type AppId = 'outlook' | 'sap' | 'fsm' | 'mobile' | 'console' | 'settings' | 'porta';
+export type AppId = 'outlook' | 'sap' | 'fsm' | 'mobile' | 'console' | 'settings' | 'porta' | 'gallery';
 
 export interface WindowState {
   id: AppId;
@@ -24,8 +24,8 @@ export interface SapFormState {
   orderType: string;
   equipment: string;
   soldToParty: string;
-  customerAddress?: string;
-  customerName?: string;
+  customerAddress?: string; // New field for dynamic address
+  customerName?: string;    // New field for dynamic customer name
   priority: string;
   shortText: string;
   errorDesc: string;
@@ -42,7 +42,7 @@ export interface Email {
   data?: {
     ticketId: string;
     customer: string;
-    customerAddress?: string;
+    customerAddress?: string; // Support address in extracted data
     debitorId: string;
     equipment: string;
     error: string;
@@ -68,6 +68,19 @@ export interface FaultCandidate {
   fault: string;
   confidence: number;
   reasoning: string;
+  shortReasoning?: string;
+}
+
+export interface Part {
+  id: string;
+  name: string;
+  price: number;
+  inStock: boolean;
+  quantity: number;
+  // New fields for detailed diagnosis
+  confidence?: number;
+  reasoning?: string;
+  rank?: number;
 }
 
 export interface Diagnosis {
@@ -190,7 +203,7 @@ export interface Ticket {
   status: string;
   createdAt: string;
   slaDeadline: string;
-  assignedTech?: string;
+  assignedTech?: string; // Added to support tech assignment tracking
 }
 
 export interface OSState {
@@ -203,8 +216,11 @@ export interface OSState {
   emails: Email[];
   selectedEmailId: string | null;
   sapForm: SapFormState;
-  assignedTech: string | null;
   
+  assignedTech: string | null;
+  dispatchStatus: 'idle' | 'planning' | 'review' | 'confirmed'; // Updated
+  selectedSlot: { techId: string; techName: string; time: string } | null; // New field
+
   diagnosis: Diagnosis | null;
   mobile: MobileState;
   porta: PortaState;
@@ -232,14 +248,6 @@ export interface Technician {
   experience: string;
   ftfr: number;
   available: boolean;
-}
-
-export interface Part {
-  id: string;
-  name: string;
-  price: number;
-  inStock: boolean;
-  quantity: number;
 }
 
 export interface Toast {
